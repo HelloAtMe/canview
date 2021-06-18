@@ -51,7 +51,9 @@ class Message(object):
 
     def set_vars(self, varsAttribute):
         self.varsAttribute = varsAttribute
-        self.parse_data()
+        # error it can be parse because msg length may not be set 
+        # cause a error in function "extractvar", variable "dataSetStr" is ''
+        # self.parse_data()
 
 
     def modify_data(self, varName, varValue):
@@ -76,7 +78,7 @@ class Message(object):
                     vData = min
 
                 self.varsValue.update({k:vData})
-                
+
                 rData = int((vData - offset) / factor)
                 dataSetStr = self.filldata(dataSetStr, rData, start, length)
                 break

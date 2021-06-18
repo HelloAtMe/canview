@@ -96,9 +96,9 @@ class App(AppUI):
         self.varsAttributeFromDbc = {}
 
         # test parameter
-        self.Button_connect_bt_cmd()
-        self.Button_start_device_bt_cmd()
-        self.update()
+        # self.Button_connect_bt_cmd()
+        # self.Button_start_device_bt_cmd()
+        # self.update()
         # ================ Code Here ================ #
         self.after(PERIODIC_TIME, self.periodic_cmd)
         
@@ -301,12 +301,14 @@ class App(AppUI):
                 varAttribute = self.varsAttributeFromDbc.get(id, {})
                 self.lock.acquire()
                 msg.set_vars(varAttribute)
+                msg.parse_data()
                 self.lock.release()
 
             for id, msg in self.recvMsg.items():
                 varAttribute = self.varsAttributeFromDbc.get(id, {})
                 self.lock.acquire()
                 msg.set_vars(varAttribute)
+                msg.parse_data()
                 self.lock.release()
 
         # ================ Code Here ================ #
@@ -333,10 +335,12 @@ class App(AppUI):
         for _, msg in self.sendMsg.items():
             self.lock.acquire()
             msg.set_vars({})
+            msg.parse_data()
             self.lock.release()
         for _, msg in self.sendMsg.items():
             self.lock.acquire()
             msg.set_vars({})
+            msg.parse_data()
             self.lock.release()
 
         self.Listbox_dbc_value.set([os.path.basename(f) for f in self.dbcFiles])
@@ -523,6 +527,7 @@ class App(AppUI):
             msg.aliveCount = self.Checkbutton_alivecounter_1_value.get()
             msg.crc = self.Checkbutton_crc_1_value.get()
             msg.set_vars(self.varsAttributeFromDbc.get(id_str, {}))
+            msg.parse_data()
 
             if self.Entry_id_text.get() in self.sendMsg.keys():
                 messagebox.showerror('错误', 'Message已存在')
