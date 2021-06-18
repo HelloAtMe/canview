@@ -50,20 +50,20 @@ class Message(object):
     
 
     def set_vars(self, varsAttribute):
-        for k, v in varsAttribute.items():
-            self.varsAttribute.update({k:v})
+        self.varsAttribute = varsAttribute
         self.parse_data()
 
 
     def modify_data(self, varName, varValue):
         ''' varsValue -> data '''
-        dataSetStr = '0' * self.length * 8
-        self.varsValue.update({varName:varValue})
+        dataSetStr = ''
+        for i in range(self.length):
+            dataSetStr += '{:0>8b}'.format(self.data[i])
 
         for k, v in self.varsAttribute.items():
             if k == varName:
                 rData = 0
-                vData = self.varsValue.get(k)
+                vData = varValue
                 start = v.get('start')
                 length = v.get('length')
                 factor = v.get('factor')
@@ -74,16 +74,20 @@ class Message(object):
                     vData = max
                 elif vData < min:
                     vData = min
-                rData = vData * factor + offset
-                dataSetStr = self.bit2data(dataSetStr, rData, start, length)
+
+                self.varsValue.update({k:vData})
+                
+                rData = int((vData - offset) / factor)
+                dataSetStr = self.filldata(dataSetStr, rData, start, length)
                 break
-            
+
         for i in range(self.length):
             self.data[i] = int(dataSetStr[(i*8):(i*8+8)], 2)
 
 
     def parse_data(self):
         ''' data -> varsValue '''
+        self.varsValue = {}
         dataSetStr = ''
         for i in range(self.length):
             dataSetStr += '{:0>8b}'.format(self.data[i])
@@ -94,7 +98,7 @@ class Message(object):
             offset = v.get('offset')
             min = v.get('min')
             max = v.get('max')
-            rData = (self.data2bit(dataSetStr, start, length) - offset) / factor
+            rData = self.extractvar(dataSetStr, start, length)*factor+offset
             if rData > max:
                 rData = max
             elif rData < min:
@@ -102,30 +106,32 @@ class Message(object):
             self.varsValue.update({k:rData})
 
 
-    def bit2data(self, dataSetStr, rData, start, length):
+    def filldata(self, dataSetStr, rData, start, length):
+        dataSetStrLst = list(dataSetStr)
         rdataCtrl = '{{:0>{0}b}}'.format(length)
         rdataStr = rdataCtrl.format(rData)
-        _t = start / 8
+        _t = start // 8
         _m = start % 8
-        _start = _t*8+(8-_m)
+        _start = _t*8+(7-_m)
 
         for i in range(length):
-            dataSetStr[_start-i] = rdataStr[length-i]
+            dataSetStrLst[_start+i] = rdataStr[i]
         
-        return dataSetStr
+        return ''.join(dataSetStrLst)
 
 
-    def data2bit(self, dataSetStr, start, length):
+    def extractvar(self, dataSetStr, start, length):
         rdataCtrl = '{{:0>{0}b}}'.format(length)
         rdataStr = rdataCtrl.format(0)
-        _t = start / 8
+        rdataStrLst = list(rdataStr)
+        _t = start // 8
         _m = start % 8
-        _start = _t*8+(8-_m)
+        _start = _t*8+(7-_m)
 
         for i in range(length):
-            rdataStr[length-i] = dataSetStr[_start-i]
+            rdataStrLst[i] = dataSetStr[_start+i]
 
-        return int(rdataStr,2)
+        return int(''.join(rdataStrLst),2)
 
 
 class SMessage(Message):

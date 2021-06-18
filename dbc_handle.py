@@ -14,7 +14,7 @@ def parsedbc(dbcfile):
     # SG_ SignalName : StartBit|SignalSize@ByteOrder ValueType (Factor,Offset) [Min|Max] Unit Receiver
 
     patternMessage = re.compile(r'BO_\s*(\d+)\s*\w+\s*:\s*\d{1}\s*.*')
-    patternSignal = re.compile(r'SG_\s*\w+\s*:\s*(\d+)\|(\d+)@[0|1][+|-]\s*\(([\d\.]+),([\d\.]+)\)\s*\[([\d\.]+)\|([\d\.]+)\]\s*“.*”\s*.*')
+    patternSignal = re.compile(r'SG_\s*(\w+)\s*:\s*(\d+)\|(\d+)@[0|1][+|-]\s*\(([\d\.]+),([-\d\.]+)\)\s*\[([-\d\.]+)\|([-\d\.]+)\]\s*".*"\s*.*')
 
     MsgsAttributeDict = {}
 
@@ -23,9 +23,9 @@ def parsedbc(dbcfile):
         dbclines = [l.strip() for l in dbclines]
 
         MsgId = ''
-        for line in dbclines:
-            SignalsAttributeDict = {}
+        SignalsAttributeDict = {}
 
+        for line in dbclines:
             MsgIdStrLst = patternMessage.findall(line)
             if MsgIdStrLst:
                 if SignalsAttributeDict:
@@ -36,13 +36,13 @@ def parsedbc(dbcfile):
                 SignalAttributeStrLst = patternSignal.findall(line)
                 if SignalAttributeStrLst:
                     if MsgId:
-                        varName = SignalAttributeStrLst[0]
-                        start = int(SignalAttributeStrLst[1])
-                        length = int(SignalAttributeStrLst[2])
-                        factor = formatString2Number(SignalAttributeStrLst[3])
-                        offset = formatString2Number(SignalAttributeStrLst[4])
-                        min = formatString2Number(SignalAttributeStrLst[5])
-                        max = formatString2Number(SignalAttributeStrLst[6])
+                        varName = SignalAttributeStrLst[0][0]
+                        start = int(SignalAttributeStrLst[0][1])
+                        length = int(SignalAttributeStrLst[0][2])
+                        factor = formatString2Number(SignalAttributeStrLst[0][3])
+                        offset = formatString2Number(SignalAttributeStrLst[0][4])
+                        min = formatString2Number(SignalAttributeStrLst[0][5])
+                        max = formatString2Number(SignalAttributeStrLst[0][6])
 
                         SignalsAttributeDict.update(
                             {
@@ -58,6 +58,7 @@ def parsedbc(dbcfile):
                         )
                         
         MsgsAttributeDict.update({MsgId:SignalsAttributeDict})
+    return MsgsAttributeDict
 
 
 def formatString2Number(numStr):
@@ -69,12 +70,11 @@ def formatString2Number(numStr):
 
 if __name__ == '__main__':
     patternMessage = re.compile(r'BO_\s*(\d+)\s*\w+\s*:\s*\d{1}\s*.*')
-    patternSignal = re.compile(r'SG_\s*(\w+)\s*:\s*(\d+)\|(\d+)@[0|1][+|-]\s*\(([\d\.]+),([\d\.]+)\)\s*\[([\d\.]+)\|([\d\.]+)\]\s*“.*”\s*.*')
+    patternSignal = re.compile(r'SG_\s*(\w+)\s*:\s*(\d+)\|(\d+)@[0|1][+|-]\s*\(([\d\.]+),([\d\.]+)\)\s*\[([\d\.]+)\|([\d\.]+)\]\s*".*"\s*.*')
 
     p1 = 'BO_ 996 HUD_1_B: 8 HUD'
     p2 = 'SG_ HUD_BrightnessLv : 15|4@0+ (0.1,12.1) [0|15] “lv” ACU,AVNT'
+    p3 = 'SG_ FCM_ACC_TorqReq_VD : 11|1@0+ (1,0) [0|1] "" GW, GW_VCU'
 
-    print(re.findall(patternMessage, p1))
-    print(re.findall(patternSignal, p2))
     print(patternMessage.findall(p1))
-    print(patternSignal.findall(p2))
+    print(patternSignal.findall(p3))

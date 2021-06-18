@@ -92,10 +92,13 @@ class App(AppUI):
         self.recvCanMsg = TPCANMsg()
         self.recvCanTimestamp = TPCANTimestamp()
 
+        # load dbc parameter
+        self.varsAttributeFromDbc = {}
+
         # test parameter
-        # self.Button_connect_bt_cmd()
-        # self.Button_start_device_bt_cmd()
-        # self.update()
+        self.Button_connect_bt_cmd()
+        self.Button_start_device_bt_cmd()
+        self.update()
         # ================ Code Here ================ #
         self.after(PERIODIC_TIME, self.periodic_cmd)
         
@@ -135,6 +138,7 @@ class App(AppUI):
         for item in self.Treeview_send_msg.selection():
             msg = self.sendMsg.get(item, None)
             if msg:
+                self.lock.acquire()
                 if msg.length == 8:
                     msg.updateAliveCount()
                     msg.updateCRC()
@@ -144,7 +148,7 @@ class App(AppUI):
                 for i in range(msg.length):
                     self.sendCanMsg.DATA[i] = msg.data[i]
                 msg.updateCount()
-
+                self.lock.release()
                 self.sendCanMsg.MSGTYPE = PCAN_MESSAGE_STANDARD
                 self.m_objPCANBasic.Write(self.d_Channel,self.sendCanMsg)
 
@@ -155,7 +159,7 @@ class App(AppUI):
         # Write things need to be handled, here ...
         # ================ Code Here ================ #
         for item in self.Treeview_send_msg.selection():
-            column= int(self.Treeview_send_msg.identify_column(event.x).replace('#', ''))# 列
+            column= int(self.Treeview_send_msg.identify_column(event.x).replace('#', ''))   # Column
             try:
                 _ = int(item, 16)
             except:
@@ -184,13 +188,7 @@ class App(AppUI):
                                 sendMsg.crc = False
                             else:
                                 sendMsg.crc = True
-                        
                         self.lock.release()
-                
-
-            # waitFlag.set(1)
-                
-
         # ================ Code Here ================ #
 
     def Button_connect_bt_cmd(self):
@@ -279,7 +277,9 @@ class App(AppUI):
         # ================ Code Here ================ #
         for i in self.Treeview_send_msg.selection():
             self.Treeview_send_msg.delete(i)
+            self.lock.acquire()
             self.sendMsg.pop(i)
+            self.lock.release()
 
         # ================ Code Here ================ #
 
@@ -294,12 +294,20 @@ class App(AppUI):
                     break
 
         # parse the dbc
-        varsAttributeFromDbc = parsedbc(self.dbcFileSelect)
+        if self.dbcFileSelect:
+            self.varsAttributeFromDbc = parsedbc(self.dbcFileSelect)
 
-        for id, msg in self.sendMsg.items():
-            varAttribute = varsAttributeFromDbc.get(id, None)
-            if varAttribute:
+            for id, msg in self.sendMsg.items():
+                varAttribute = self.varsAttributeFromDbc.get(id, {})
+                self.lock.acquire()
                 msg.set_vars(varAttribute)
+                self.lock.release()
+
+            for id, msg in self.recvMsg.items():
+                varAttribute = self.varsAttributeFromDbc.get(id, {})
+                self.lock.acquire()
+                msg.set_vars(varAttribute)
+                self.lock.release()
 
         # ================ Code Here ================ #
 
@@ -319,6 +327,17 @@ class App(AppUI):
 
         for d in dbcFilesToBeDeleted:
             self.dbcFiles.remove(d)
+
+        self.varsAttributeFromDbc = {}
+
+        for _, msg in self.sendMsg.items():
+            self.lock.acquire()
+            msg.set_vars({})
+            self.lock.release()
+        for _, msg in self.sendMsg.items():
+            self.lock.acquire()
+            msg.set_vars({})
+            self.lock.release()
 
         self.Listbox_dbc_value.set([os.path.basename(f) for f in self.dbcFiles])
 
@@ -503,6 +522,7 @@ class App(AppUI):
             msg.cycleTime = int(self.Entry_period_time_text.get())
             msg.aliveCount = self.Checkbutton_alivecounter_1_value.get()
             msg.crc = self.Checkbutton_crc_1_value.get()
+            msg.set_vars(self.varsAttributeFromDbc.get(id_str, {}))
 
             if self.Entry_id_text.get() in self.sendMsg.keys():
                 messagebox.showerror('错误', 'Message已存在')
@@ -572,22 +592,24 @@ class App(AppUI):
         for i, msg in self.sendMsg.items():
             if i in self.Treeview_send_msg.get_children():
                 self.Treeview_send_msg.item(i, values=(['{:0>2X}'.format(d) for d in msg.data],  msg.cycleTime, msg.count, msg.aliveCount, msg.crc))
-                for k, v in msg.varsValue.items():
-                    self.Treeview_send_msg.set(k, column=1, value=v)
             else:
                 self.Treeview_send_msg.insert('', 'end', iid=i, text=i, values=(['{:0>2X}'.format(d) for d in msg.data], msg.cycleTime, msg.count, msg.aliveCount, msg.crc))
-                for k, v in msg.varsValue.items():
+            for k, v in msg.varsValue.items():
+                if k in self.Treeview_send_msg.get_children(i):
+                    self.Treeview_send_msg.set(k, column=1, value=v)
+                else:
                     self.Treeview_send_msg.insert(i, 'end', iid=k, text=k, values=(v, '', '', '', ''))
 
     def update_Treeview_recv_msg(self):
         for i, msg in self.recvMsg.items():
             if i in self.Treeview_recv_msg.get_children():
                 self.Treeview_recv_msg.item(i, values=(['{:0>2X}'.format(d) for d in msg.data], msg.cycleTime, msg.count))
-                for k, v in msg.varsValue.items():
-                    self.Treeview_recv_msg.set(k, column=1, value=v)
             else:
                 self.Treeview_recv_msg.insert('', 'end', iid=i, text=i, values=(['{:0>2X}'.format(d) for d in msg.data], msg.cycleTime, msg.count))
-                for k, v in msg.varsValue.items():
+            for k, v in msg.varsValue.items():
+                if k in self.Treeview_recv_msg.get_children(i):
+                    self.Treeview_recv_msg.set(k, column=1, value=v)
+                else:
                     self.Treeview_recv_msg.insert(i, 'end', iid=k, text=k, values=(v, '', ''))
 
 
@@ -614,6 +636,7 @@ class App(AppUI):
                         for i in range(msg.length):
                             self.sendCanMsg.DATA[i] = msg.data[i]
                         msg.updateCount()
+                        msg.parse_data()
 
                         self.sendCanMsg.MSGTYPE = PCAN_MESSAGE_STANDARD
                         self.m_objPCANBasic.Write(self.d_Channel,self.sendCanMsg)
@@ -638,9 +661,9 @@ class App(AppUI):
                     recvMsg = self.recvMsg.get('{:0>3X}'.format(self.recvCanMsg.ID), None)
                     if not recvMsg:
                         recvMsg = RMessage()
+                        recvMsg.set_vars(self.varsAttributeFromDbc.get('{:0>3X}'.format(self.recvCanMsg.ID), {}))
                         self.recvMsg.update({'{:0>3X}'.format(self.recvCanMsg.ID):recvMsg})
-
-                    recvMsg.id = self.recvCanMsg.ID
+                    recvMsg.id = self.recvCanMsg.ID                    
                     recvMsg.length = self.recvCanMsg.LEN
                     for i in range(recvMsg.length):
                         recvMsg.data[i] = self.recvCanMsg.DATA[i]
@@ -665,9 +688,24 @@ class TreeBox(Entry):
         super().__init__(master)
         self.cBtn = Button(self, text='确定', command=self.comfirm)
         self.grab_set()
-        self.bind('<Enter>', lambda event : self.bind('<Return>', lambda event : self.comfirm()))
-        self.bind('<Leave>', lambda event : self.unbind('<Return>'))
+        self.bind('<Enter>', self.bindevent)
+        self.bind('<Leave>', self.unbindevent)
         
+    
+    def bindevent(self, event):
+        self.bind('<Return>', lambda event : self.comfirm())
+        self.bind('<KeyPress-Escape>', self.cancel)
+    
+    def unbindevent(self, event):
+        self.unbind('<Return>')
+        self.unbind('<KeyPress-Escape>')
+
+    def cancel(self, event):
+        self.flag.set(value=1)
+        self.grab_release()
+        self.cBtn.destroy()
+        self.destroy()
+
 
     def comfirm(self):
         text = self.get()

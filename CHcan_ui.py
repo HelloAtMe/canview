@@ -361,10 +361,30 @@ class AppUI(Tk):
     def root_widget_size(self):
         # ================ Auto Code ================ #
         # For place the widget : Treeview_recv_msg
+        zone1_x = 0
+        zone1_y = 20
+        zone1_w = self.root_width - 150
+        zone1_h = self.root_height // 2 - 20
+
+        zone2_x = 0
+        zone2_y = zone1_y + zone1_h + 20
+        zone2_w = zone1_w
+        zone2_h = zone1_h
+
+        zone3_x = zone1_w
+        zone3_y = zone1_y
+        zone3_w = 150
+        zone3_h = zone1_h
+
+        zone4_x = zone2_w
+        zone4_y = zone2_y
+        zone4_w = 150
+        zone4_h = zone2_h
+
         self.Treeview_recv_msg_bx = 30
-        self.Treeview_recv_msg_by = 20
-        self.Treeview_recv_msg_bw = 700
-        self.Treeview_recv_msg_bh = 300
+        self.Treeview_recv_msg_by = zone1_y
+        self.Treeview_recv_msg_bw = zone1_w - 30
+        self.Treeview_recv_msg_bh = zone1_h
         self.Treeview_recv_msg_x = self.Treeview_recv_msg_bx
         self.Treeview_recv_msg_y = self.Treeview_recv_msg_by
         self.Treeview_recv_msg_w = self.Treeview_recv_msg_bw - SCROLLBAR_WIDTH
@@ -375,9 +395,9 @@ class AppUI(Tk):
         self.Treeview_recv_msg_scrollbar_vertical_h = self.Treeview_recv_msg_h
         # For place the widget : Treeview_send_msg
         self.Treeview_send_msg_bx = 30
-        self.Treeview_send_msg_by = 340
-        self.Treeview_send_msg_bw = 700
-        self.Treeview_send_msg_bh = 300
+        self.Treeview_send_msg_by = zone2_y
+        self.Treeview_send_msg_bw = zone2_w - 30
+        self.Treeview_send_msg_bh = zone2_h
         self.Treeview_send_msg_x = self.Treeview_send_msg_bx
         self.Treeview_send_msg_y = self.Treeview_send_msg_by
         self.Treeview_send_msg_w = self.Treeview_send_msg_bw - SCROLLBAR_WIDTH
@@ -387,14 +407,14 @@ class AppUI(Tk):
         self.Treeview_send_msg_scrollbar_vertical_w = SCROLLBAR_WIDTH
         self.Treeview_send_msg_scrollbar_vertical_h = self.Treeview_send_msg_h
         # For place the widget : Button_connect
-        self.Button_connect_x = 733
-        self.Button_connect_y = 52
+        self.Button_connect_x = zone3_x + 3
+        self.Button_connect_y = zone3_y + 32
         self.Button_connect_w = 70
         self.Button_connect_h = 30
         # For place the widget : Listbox_dbc
-        self.Listbox_dbc_bx = 732
-        self.Listbox_dbc_by = 147
-        self.Listbox_dbc_bw = 148
+        self.Listbox_dbc_bx = zone3_x
+        self.Listbox_dbc_by = zone3_y + 127
+        self.Listbox_dbc_bw = 150
         self.Listbox_dbc_bh = 100
         self.Listbox_dbc_x = self.Listbox_dbc_bx
         self.Listbox_dbc_y = self.Listbox_dbc_by
@@ -405,73 +425,73 @@ class AppUI(Tk):
         self.Listbox_dbc_scrollbar_vertical_w = SCROLLBAR_WIDTH
         self.Listbox_dbc_scrollbar_vertical_h = self.Listbox_dbc_h
         # For place the widget : Button_add_dbc
-        self.Button_add_dbc_x = 733
-        self.Button_add_dbc_y = 249
+        self.Button_add_dbc_x = zone3_x + 3
+        self.Button_add_dbc_y = zone3_y + 229
         self.Button_add_dbc_w = 70
         self.Button_add_dbc_h = 30
         # For place the widget : Button_add_msg
-        self.Button_add_msg_x = 731
-        self.Button_add_msg_y = 372
+        self.Button_add_msg_x = zone4_x + 3
+        self.Button_add_msg_y = zone4_y + 32
         self.Button_add_msg_w = 70
         self.Button_add_msg_h = 30
         # For place the widget : Button_reset
-        self.Button_reset_x = 733
-        self.Button_reset_y = 82
+        self.Button_reset_x = zone3_x + 3
+        self.Button_reset_y = zone3_y + 62
         self.Button_reset_w = 70
         self.Button_reset_h = 30
         # For place the widget : Button_exit_device
-        self.Button_exit_device_x = 809
-        self.Button_exit_device_y = 52
+        self.Button_exit_device_x = zone3_x + 79
+        self.Button_exit_device_y = zone3_y + 32
         self.Button_exit_device_w = 70
         self.Button_exit_device_h = 30
         # For place the widget : Label_connect_status
-        self.Label_connect_status_x = 730
-        self.Label_connect_status_y = 611
+        self.Label_connect_status_x = zone4_x
+        self.Label_connect_status_y = zone4_y + zone4_h - 30
         self.Label_connect_status_w = 150
         self.Label_connect_status_h = 30
         # For place the widget : Label_11
-        self.Label_11_x = 0
-        self.Label_11_y = 20
+        self.Label_11_x = zone1_x
+        self.Label_11_y = zone1_y
         self.Label_11_w = 29
-        self.Label_11_h = 300
+        self.Label_11_h = zone1_h
         # For place the widget : Label_3210
-        self.Label_3210_x = 0
-        self.Label_3210_y = 341
+        self.Label_3210_x = zone2_x
+        self.Label_3210_y = zone2_y
         self.Label_3210_w = 29
-        self.Label_3210_h = 300
+        self.Label_3210_h = zone2_h
         # For place the widget : Button_del_msg
-        self.Button_del_msg_x = 809
-        self.Button_del_msg_y = 372
+        self.Button_del_msg_x = zone4_x + 79
+        self.Button_del_msg_y = zone4_y + 32
         self.Button_del_msg_w = 70
         self.Button_del_msg_h = 30
         # For place the widget : Button_apply_dbc
-        self.Button_apply_dbc_x = 809
-        self.Button_apply_dbc_y = 249
+        self.Button_apply_dbc_x = zone3_x + 79
+        self.Button_apply_dbc_y = zone3_y + 229
         self.Button_apply_dbc_w = 70
         self.Button_apply_dbc_h = 30
         # For place the widget : Label_5678
-        self.Label_5678_x = 732
-        self.Label_5678_y = 117
-        self.Label_5678_w = 148
+        self.Label_5678_x = zone3_x
+        self.Label_5678_y = zone3_y+97
+        self.Label_5678_w = 150
         self.Label_5678_h = 30
         # For place the widget : Button_del_dbc
-        self.Button_del_dbc_x = 733
-        self.Button_del_dbc_y = 279
+        self.Button_del_dbc_x = zone3_x + 3
+        self.Button_del_dbc_y = zone3_y + 259
         self.Button_del_dbc_w = 70
         self.Button_del_dbc_h = 30
         # For place the widget : Label_4563
-        self.Label_4563_x = 732
-        self.Label_4563_y = 340
-        self.Label_4563_w = 148
+        self.Label_4563_x = zone4_x
+        self.Label_4563_y = zone4_y
+        self.Label_4563_w = 150
         self.Label_4563_h = 30
         # For place the widget : Label_1456
-        self.Label_1456_x = 732
-        self.Label_1456_y = 20
-        self.Label_1456_w = 148
+        self.Label_1456_x = zone3_x
+        self.Label_1456_y = zone3_y
+        self.Label_1456_w = 150
         self.Label_1456_h = 30
         # For place the widget : Button_pause_start
-        self.Button_pause_start_x = 731
-        self.Button_pause_start_y = 406
+        self.Button_pause_start_x = zone4_x + 3
+        self.Button_pause_start_y = zone4_y + 62
         self.Button_pause_start_w = 70
         self.Button_pause_start_h = 30
         # ================ Auto Code ================ #
