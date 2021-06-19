@@ -12,3 +12,4 @@
 
 ## 软件更新记录
  - 2021/6/19 解决dbc文件中不同id中存在相同信号，导致软件阻塞的问题
+ - 2021/6/19 self.update_Treeview_recv_msg() dictionary changed size during iteration

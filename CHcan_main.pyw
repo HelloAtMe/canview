@@ -595,6 +595,7 @@ class App(AppUI):
             ctrl.set(value=text)
 
     def update_Treeview_send_msg(self):
+        self.lock.acquire()
         for i, msg in self.sendMsg.items():
             if i in self.Treeview_send_msg.get_children():
                 self.Treeview_send_msg.item(i, values=(['{:0>2X}'.format(d) for d in msg.data],  msg.cycleTime, msg.count, msg.aliveCount, msg.crc))
@@ -605,8 +606,10 @@ class App(AppUI):
                     self.Treeview_send_msg.set(i+k, column=1, value=v)
                 else:
                     self.Treeview_send_msg.insert(i, 'end', iid=i+k, text=k, values=(v, '', '', '', ''))
+        self.lock.release()
 
     def update_Treeview_recv_msg(self):
+        self.lock.acquire()
         for i, msg in self.recvMsg.items():
             if i in self.Treeview_recv_msg.get_children():
                 self.Treeview_recv_msg.item(i, values=(['{:0>2X}'.format(d) for d in msg.data], msg.cycleTime, msg.count))
@@ -617,6 +620,7 @@ class App(AppUI):
                     self.Treeview_recv_msg.set(i+k, column=1, value=v)
                 else:
                     self.Treeview_recv_msg.insert(i, 'end', iid=i+k, text=k, values=(v, '', ''))
+        self.lock.release()
 
 
     def send_message(self, lock):
