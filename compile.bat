@@ -1,7 +1,7 @@
 @echo off
 @echo Start Compile
 
-set VERSION=v1_0_0
+set VERSION=v1_1_0
 set APP_NAME=CHcan_main
 @rem set ICO_PATH=
 set SCRIPT=%APP_NAME%.pyw

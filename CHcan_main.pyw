@@ -276,10 +276,11 @@ class App(AppUI):
         # Write things need to be handled, here ...
         # ================ Code Here ================ #
         for i in self.Treeview_send_msg.selection():
-            self.Treeview_send_msg.delete(i)
-            self.lock.acquire()
-            self.sendMsg.pop(i)
-            self.lock.release()
+            if i in self.sendMsg.keys():
+                self.Treeview_send_msg.delete(i)
+                self.lock.acquire()
+                self.sendMsg.pop(i)
+                self.lock.release()
 
         # ================ Code Here ================ #
 
@@ -600,10 +601,10 @@ class App(AppUI):
             else:
                 self.Treeview_send_msg.insert('', 'end', iid=i, text=i, values=(['{:0>2X}'.format(d) for d in msg.data], msg.cycleTime, msg.count, msg.aliveCount, msg.crc))
             for k, v in msg.varsValue.items():
-                if k in self.Treeview_send_msg.get_children(i):
-                    self.Treeview_send_msg.set(k, column=1, value=v)
+                if i+k in self.Treeview_send_msg.get_children(i):
+                    self.Treeview_send_msg.set(i+k, column=1, value=v)
                 else:
-                    self.Treeview_send_msg.insert(i, 'end', iid=k, text=k, values=(v, '', '', '', ''))
+                    self.Treeview_send_msg.insert(i, 'end', iid=i+k, text=k, values=(v, '', '', '', ''))
 
     def update_Treeview_recv_msg(self):
         for i, msg in self.recvMsg.items():
@@ -612,10 +613,10 @@ class App(AppUI):
             else:
                 self.Treeview_recv_msg.insert('', 'end', iid=i, text=i, values=(['{:0>2X}'.format(d) for d in msg.data], msg.cycleTime, msg.count))
             for k, v in msg.varsValue.items():
-                if k in self.Treeview_recv_msg.get_children(i):
-                    self.Treeview_recv_msg.set(k, column=1, value=v)
+                if i+k in self.Treeview_recv_msg.get_children(i):
+                    self.Treeview_recv_msg.set(i+k, column=1, value=v)
                 else:
-                    self.Treeview_recv_msg.insert(i, 'end', iid=k, text=k, values=(v, '', ''))
+                    self.Treeview_recv_msg.insert(i, 'end', iid=i+k, text=k, values=(v, '', ''))
 
 
     def send_message(self, lock):
@@ -657,7 +658,7 @@ class App(AppUI):
             _currentTime = time.time_ns()
             _intervalTime = _currentTime - _startTime
 
-            if _intervalTime > 100000:
+            if _intervalTime > 1000000:
                 _startTime = _currentTime
                 lock.acquire()
 
